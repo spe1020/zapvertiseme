@@ -1,8 +1,9 @@
 {
-  "name": "mkstack",
+  "name": "zap-discovery",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Discover active Nostr users and support them with Bitcoin Lightning zaps",
   "scripts": {
     "dev": "npm i --silent && vite",
     "build": "npm i --silent && vite build -l error && cp dist/index.html dist/404.html && echo 'Project built successfully!'",
