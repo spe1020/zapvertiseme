@@ -15,7 +15,7 @@ import { useDiscovery } from '@/hooks/useDiscovery';
 
 const Discovery = () => {
   useSeoMeta({
-    title: 'Zap Discovery - Find Active Nostr Users',
+    title: 'Zapvertise Me - Find Active Nostr Users',
     description: 'Discover active Nostr users and support them with zaps. Find real people, filter out bots, and spread Bitcoin love.',
   });
 
@@ -43,7 +43,7 @@ const Discovery = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                  Zap Discovery
+                  Zapvertise Me
                 </h1>
                 <p className="text-sm text-muted-foreground">Find and support active Nostr users</p>
               </div>
@@ -66,7 +66,7 @@ const Discovery = () => {
               <Alert>
                 <Sparkles className="h-4 w-4" />
                 <AlertDescription>
-                  Zap Discovery helps you find real, active Nostr users and support them with Bitcoin Lightning zaps.
+                  Zapvertise Me helps you find real, active Nostr users and support them with Bitcoin Lightning zaps.
                   Login to get started!
                 </AlertDescription>
               </Alert>

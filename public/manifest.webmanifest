@@ -1,0 +1,21 @@
+{
+  "name": "Zap Discovery",
+  "short_name": "ZapDiscovery",
+  "description": "Discover active Nostr users and support them with Bitcoin Lightning zaps",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9333ea",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

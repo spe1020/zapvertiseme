@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { DiscoveryZapDialog } from '@/components/discovery/DiscoveryZapDialog';
 import type { UserData } from '@/hooks/useDiscovery';
 import { nip19 } from 'nostr-tools';
+import { useAuthor } from '@/hooks/useAuthor';
 
 interface UserCardProps {
   userData: UserData;
@@ -16,10 +17,20 @@ interface UserCardProps {
 }
 
 export function UserCard({ userData, onViewNotes, onRemove }: UserCardProps) {
-  const { pubkey, metadata, isBot, recentNotes } = userData;
+  const { pubkey, metadata: initialMetadata, isBot, recentNotes } = userData;
   const [isZapped, setIsZapped] = useState(false);
 
+  // Fetch fresh metadata if we don't have it (similar to NoteFeed)
+  const { data: authorData } = useAuthor(!initialMetadata ? pubkey : undefined);
+  
+  // Use fresh metadata if available, otherwise fall back to initial metadata
+  const metadata = authorData?.metadata || initialMetadata;
+
+  // Get display name (preferred display name, or name, or generated)
   const displayName = metadata?.display_name || metadata?.name || genUserName(pubkey);
+  // Get username (actual name field from metadata)
+  const username = metadata?.name;
+  const nip05 = metadata?.nip05;
   const about = metadata?.about || '';
   const picture = metadata?.picture;
   const hasLightning = !!(metadata?.lud16 || metadata?.lud06);
@@ -72,9 +83,28 @@ export function UserCard({ userData, onViewNotes, onRemove }: UserCardProps) {
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground font-mono truncate">
-              {npub.slice(0, 16)}...
-            </p>
+            <div className="space-y-0.5">
+              {username && (
+                <p className="text-sm font-medium text-foreground truncate">
+                  {username}
+                </p>
+              )}
+              {nip05 && (
+                <p className="text-xs text-muted-foreground truncate font-medium">
+                  {nip05}
+                </p>
+              )}
+              {!username && !nip05 && (
+                <p className="text-xs text-muted-foreground font-mono truncate">
+                  {npub.slice(0, 16)}...
+                </p>
+              )}
+              {(username || nip05) && (
+                <p className="text-xs text-muted-foreground font-mono truncate opacity-70">
+                  {npub.slice(0, 16)}...
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>

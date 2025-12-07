@@ -71,13 +71,15 @@ export function useDiscovery() {
         .sort(() => Math.random() - 0.5)
         .slice(0, 20);
 
-      // Fetch metadata for selected authors
+      // Fetch metadata for selected authors with longer timeout
+      const metadataSignal = AbortSignal.timeout(15000); // 15 second timeout for profiles
       const metadataEvents = await nostr.query(
         [{ 
           kinds: [0], 
           authors: selectedAuthors,
+          limit: selectedAuthors.length,
         }],
-        { signal }
+        { signal: metadataSignal }
       );
 
       // Create a map of pubkey to metadata
@@ -90,21 +92,38 @@ export function useDiscovery() {
         }
       });
 
-      // Build user data array with bot detection
+      // Build user data array with bot detection and lightning filtering
       const userData: UserData[] = [];
       let botsFiltered = 0;
+      let noLightningFiltered = 0;
 
       for (const pubkey of selectedAuthors) {
         const metadataEvent = metadataMap.get(pubkey);
         let metadata;
         
-        try {
-          metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined;
-        } catch {
-          metadata = undefined;
+        if (metadataEvent && metadataEvent.content) {
+          try {
+            const parsed = JSON.parse(metadataEvent.content);
+            // Ensure we have a valid metadata object
+            if (parsed && typeof parsed === 'object') {
+              metadata = parsed;
+            }
+          } catch (err) {
+            console.warn(`Failed to parse metadata for ${pubkey}:`, err);
+            metadata = undefined;
+          }
         }
 
-        // Bot detection: check for "bot" in name, display_name, or about
+        // Check if user has lightning address
+        const hasLightning = !!(metadata?.lud16 || metadata?.lud06);
+        
+        // Skip users without lightning addresses
+        if (!hasLightning) {
+          noLightningFiltered++;
+          continue;
+        }
+
+        // Bot detection: check for "bot" or "news" in name, display_name, or about
         const isBot = detectBot(metadata);
         
         if (isBot) {
@@ -180,8 +199,9 @@ function detectBot(metadata?: {
   // Check explicit bot flag
   if (metadata.bot === true) return true;
 
-  // Check for "bot" keyword in various fields (case insensitive)
+  // Check for "bot" or "news" keywords in various fields (case insensitive)
   const botKeyword = /\bbot\b/i;
+  const newsKeyword = /\bnews\b/i;
   
   const fields = [
     metadata.name,
@@ -189,5 +209,8 @@ function detectBot(metadata?: {
     metadata.about,
   ].filter(Boolean);
 
-  return fields.some(field => botKeyword.test(field || ''));
+  return fields.some(field => {
+    const fieldLower = (field || '').toLowerCase();
+    return botKeyword.test(fieldLower) || newsKeyword.test(fieldLower);
+  });
 }
